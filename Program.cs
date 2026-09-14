@@ -26,6 +26,7 @@
 using CachedPostsApi.ExternalApi;
 using CachedPostsApi.Repositories;
 using CachedPostsApi.Services;
+using CachedPostsApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +48,8 @@ builder.Services.AddHttpClient<IJsonPlaceholderClient, JsonPlaceholderClient>(
     });
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

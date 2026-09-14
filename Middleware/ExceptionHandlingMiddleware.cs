@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json;
 
-namespace cached_posts_api.Middleware;
+namespace CachedPostsApi.Middleware;
 
 public class ExceptionHandlingMiddleware
 {
