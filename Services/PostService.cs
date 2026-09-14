@@ -19,25 +19,39 @@ public class PostService : IPostService
 
     public async Task<List<Post>> GetPostsAsync()
     {
-        // 1. Check database first
         var cachedPosts = await _repository.GetAllAsync();
 
-        if (cachedPosts.Count > 0)
+        if (cachedPosts.Count == 0)
         {
-            return cachedPosts;
+            var externalPosts = await _externalApi.GetPostsAsync();
+
+            foreach (var post in externalPosts)
+            {
+                await _repository.AddAsync(post);
+            }
+
+            return externalPosts;
         }
 
-        // 2. Nothing in database, call external API
-        var externalPosts = await _externalApi.GetPostsAsync();
+        var cachedIds = cachedPosts
+            .Select(post => post.Id)
+            .ToHashSet();
 
-        // 3. Save external data into database
-        foreach (var post in externalPosts)
+        var externalData = await _externalApi.GetPostsAsync();
+
+        var missingPosts = externalData
+            .Where(post => !cachedIds.Contains(post.Id))
+            .ToList();
+
+        foreach (var post in missingPosts)
         {
             await _repository.AddAsync(post);
         }
 
-        // 4. Return data
-        return externalPosts;
+        return cachedPosts
+            .Concat(missingPosts)
+            .OrderBy(post => post.Id)
+            .ToList();
     }
 
     public async Task<Post?> GetPostByIdAsync(int id)
