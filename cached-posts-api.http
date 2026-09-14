@@ -1,0 +1,6 @@
+@cached_posts_api_HostAddress = http://localhost:5008
+
+GET {{cached_posts_api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
